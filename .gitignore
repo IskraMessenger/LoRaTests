@@ -18,3 +18,8 @@ x86/
 [Aa][Rr][Mm]64/
 artifacts/
 *.log
+
+## Firmware / local tooling
+firmware/build/
+tools/
+firmware/arduino-boards/package_*.json
