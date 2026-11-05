@@ -30,6 +30,7 @@ partial class Form1
         btnListen = new Button();
         btnInitHeltec = new Button();
         chkAutoListen = new CheckBox();
+        chkAutoInit = new CheckBox();
         cmbBw = new ComboBox();
         lblBw = new Label();
         cmbSf = new ComboBox();
@@ -128,6 +129,7 @@ partial class Form1
         grpHeltec.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         grpHeltec.Controls.Add(btnListen);
         grpHeltec.Controls.Add(btnInitHeltec);
+        grpHeltec.Controls.Add(chkAutoInit);
         grpHeltec.Controls.Add(chkAutoListen);
         grpHeltec.Controls.Add(cmbBw);
         grpHeltec.Controls.Add(lblBw);
@@ -143,7 +145,7 @@ partial class Form1
         grpHeltec.Size = new Size(780, 92);
         grpHeltec.TabIndex = 1;
         grpHeltec.TabStop = false;
-        grpHeltec.Text = "Heltec AT — LoRa Normal Mode (863–928 МГц)";
+        grpHeltec.Text = "HeltecAtBridge — send/receive (863–928 МГц)";
         //
         // lblBandHint
         //
@@ -152,7 +154,7 @@ partial class Form1
         lblBandHint.Location = new Point(12, 22);
         lblBandHint.Name = "lblBandHint";
         lblBandHint.Size = new Size(420, 15);
-        lblBandHint.Text = "Init: wake → AutoLPM=0 → LORAWAN=0 → PrintMode=1 → LoraSet → RX";
+        lblBandHint.Text = "Прошивка: firmware/HeltecAtBridge. Init → RX; SendHex → TX → снова RX";
         //
         // lblFreq
         //
@@ -221,33 +223,44 @@ partial class Form1
         cmbBw.Name = "cmbBw";
         cmbBw.Size = new Size(90, 23);
         //
+        // chkAutoInit
+        //
+        chkAutoInit.AutoSize = true;
+        chkAutoInit.Checked = true;
+        chkAutoInit.CheckState = CheckState.Checked;
+        chkAutoInit.Location = new Point(545, 20);
+        chkAutoInit.Name = "chkAutoInit";
+        chkAutoInit.Size = new Size(160, 19);
+        chkAutoInit.Text = "Auto Init при Connect";
+        chkAutoInit.UseVisualStyleBackColor = true;
+        //
         // chkAutoListen
         //
         chkAutoListen.AutoSize = true;
         chkAutoListen.Checked = true;
         chkAutoListen.CheckState = CheckState.Checked;
-        chkAutoListen.Location = new Point(545, 22);
+        chkAutoListen.Location = new Point(545, 42);
         chkAutoListen.Name = "chkAutoListen";
-        chkAutoListen.Size = new Size(175, 19);
-        chkAutoListen.Text = "Авто-RX после TX/timeout";
+        chkAutoListen.Size = new Size(130, 19);
+        chkAutoListen.Text = "Держать RX";
         chkAutoListen.UseVisualStyleBackColor = true;
         //
         // btnInitHeltec
         //
         btnInitHeltec.Enabled = false;
-        btnInitHeltec.Location = new Point(545, 46);
+        btnInitHeltec.Location = new Point(680, 18);
         btnInitHeltec.Name = "btnInitHeltec";
-        btnInitHeltec.Size = new Size(110, 27);
-        btnInitHeltec.Text = "Init Heltec";
+        btnInitHeltec.Size = new Size(85, 24);
+        btnInitHeltec.Text = "Init";
         btnInitHeltec.UseVisualStyleBackColor = true;
         btnInitHeltec.Click += BtnInitHeltec_Click;
         //
         // btnListen
         //
         btnListen.Enabled = false;
-        btnListen.Location = new Point(661, 46);
+        btnListen.Location = new Point(680, 46);
         btnListen.Name = "btnListen";
-        btnListen.Size = new Size(100, 27);
+        btnListen.Size = new Size(85, 27);
         btnListen.Text = "Слушать";
         btnListen.UseVisualStyleBackColor = true;
         btnListen.Click += BtnListen_Click;
@@ -403,6 +416,7 @@ partial class Form1
     private ComboBox cmbSf;
     private Label lblBw;
     private ComboBox cmbBw;
+    private CheckBox chkAutoInit;
     private CheckBox chkAutoListen;
     private Button btnInitHeltec;
     private Button btnListen;

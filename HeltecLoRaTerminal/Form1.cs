@@ -150,11 +150,33 @@ public partial class Form1 : Form
                 _lineBuffer.Clear();
 
             SetConnectedUi(true);
+            AppendStatus($"Подключено: {portName} @ {baud}");
+
+            if (chkAutoInit.Checked)
+                _ = AutoInitAfterConnectAsync();
         }
         catch (Exception ex)
         {
             AppendError($"Ошибка подключения к {portName}: {ex.Message}");
             Disconnect();
+        }
+    }
+
+    private async Task AutoInitAfterConnectAsync()
+    {
+        // Дать плате время после открытия порта (CP210x / USB).
+        await Task.Delay(400).ConfigureAwait(true);
+        if (_serial?.IsOpen != true)
+            return;
+
+        btnInitHeltec.Enabled = false;
+        try
+        {
+            await InitHeltecAsync().ConfigureAwait(true);
+        }
+        finally
+        {
+            btnInitHeltec.Enabled = _serial?.IsOpen == true;
         }
     }
 
@@ -245,13 +267,10 @@ public partial class Form1 : Form
             }
 
             var cmd = HeltecAtProtocol.SendHex(bytes);
+            AppendStatus($"TX → {BitConverter.ToString(bytes).Replace("-", " ")}");
             await SendAtAsync(cmd).ConfigureAwait(true);
-
-            if (chkAutoListen.Checked)
-            {
-                await Task.Delay(150).ConfigureAwait(true);
-                await SendAtAsync(HeltecAtProtocol.EnterRxContinuous()).ConfigureAwait(true);
-            }
+            // HeltecAtBridge сам возвращается в RX после TX done, если слушали.
+            // Дополнительный AT+RX нужен только если прошивка не держит listen.
         }
         catch (Exception ex)
         {
@@ -347,13 +366,19 @@ public partial class Form1 : Form
                 break;
 
             case HeltecLineKind.RxTimeout:
-                // Normal when nobody transmits — do not spam the error box.
+                // С HeltecAtBridge при AT+RX=0 обычно не приходит; если пришло — перевключим RX.
                 if (DateTime.Now - _lastRxTimeoutLog > TimeSpan.FromSeconds(5))
                 {
                     _lastRxTimeoutLog = DateTime.Now;
-                    AppendStatus("RX Timeout — пакетов нет, слушаю снова");
+                    AppendStatus("RX Timeout — перевожу в приём");
                 }
 
+                if (chkAutoListen.Checked)
+                    _ = RearmRxAsync();
+                break;
+
+            case HeltecLineKind.TxDone:
+                AppendStatus("TX done");
                 if (chkAutoListen.Checked)
                     _ = RearmRxAsync();
                 break;
@@ -375,6 +400,10 @@ public partial class Form1 : Form
                 break;
 
             case HeltecLineKind.Status:
+                if (line.Contains("HeltecAtBridge ready", StringComparison.OrdinalIgnoreCase))
+                    AppendStatus("Плата: HeltecAtBridge ready");
+                break;
+
             case HeltecLineKind.Other:
                 break;
         }

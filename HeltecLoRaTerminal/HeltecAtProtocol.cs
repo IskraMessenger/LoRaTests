@@ -40,10 +40,9 @@ internal static class HeltecAtProtocol
     }
 
     /// <summary>
-    /// Continuous listen. Some Heltec builds treat 0 oddly and end with RX Timeout —
-    /// use a long window; the host re-arms on timeout.
+    /// Continuous listen for HeltecAtBridge (Radio.Rx(0)).
     /// </summary>
-    public static string EnterRxContinuous() => "AT+RX=60000";
+    public static string EnterRxContinuous() => "AT+RX=0";
 
     public static string EnterRxTimeout(uint timeoutMs) => $"AT+RX={timeoutMs}";
 
@@ -123,8 +122,11 @@ internal static class HeltecAtProtocol
             return HeltecLineKind.RssiInfo;
         }
 
+        if (trimmed.Contains("TX done", StringComparison.OrdinalIgnoreCase))
+            return HeltecLineKind.TxDone;
+
         if (trimmed.StartsWith("+OK", StringComparison.OrdinalIgnoreCase) ||
-            trimmed.Contains("TX done", StringComparison.OrdinalIgnoreCase) ||
+            trimmed.Contains("HeltecAtBridge ready", StringComparison.OrdinalIgnoreCase) ||
             trimmed.Contains("ASR is Waked", StringComparison.OrdinalIgnoreCase) ||
             trimmed.StartsWith("+LORAWAN", StringComparison.OrdinalIgnoreCase) ||
             trimmed.StartsWith("+LoraPara", StringComparison.OrdinalIgnoreCase) ||
@@ -193,6 +195,7 @@ internal enum HeltecLineKind
     Status,
     Error,
     RxTimeout,
+    TxDone,
     ReceivedPayload,
     RssiInfo,
     Other
